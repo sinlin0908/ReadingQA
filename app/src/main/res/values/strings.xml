@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ReadingQA</string>
+    <string-array name="stories">
+        <item>三隻小豬</item>
+        <item>小紅帽</item>
+        <item>大野狼與七隻小羊</item>
+    </string-array>
+    <string name="submit">送出</string>
+</resources>
