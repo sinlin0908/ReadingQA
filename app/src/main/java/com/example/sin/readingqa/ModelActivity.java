@@ -3,18 +3,15 @@ package com.example.sin.readingqa;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,17 +38,16 @@ public class ModelActivity extends AppCompatActivity {
 
     private TextView txtIsConnected;
     private TextView txtQuery;
-    private TextView txtResult;
     private TextView txtOneMoreTime;
-    private EditText editAnswer;
     private ImageView imgPeople;
     private Button btnVoice;
-    private Button btnSubmit;
-    private Button btnProductQuestion;
     private Button btnYes;
     private Button btnNo;
     private LinearLayout layoutModel;
 
+
+    private TextView txtReadyAsk;
+    private Button btnAskY,btnAskN;
 
     private TextToSpeech textToSpeech = null;
     private Context thisContext = this;
@@ -77,6 +73,12 @@ public class ModelActivity extends AppCompatActivity {
         destroyTextToSpeech();
     }
 
+    private void initUI() {
+        txtIsConnected = (TextView) findViewById(R.id.txt_is_connected);
+        imgPeople = (ImageView) findViewById(R.id.img_model);
+        layoutModel = (LinearLayout) findViewById(R.id.layout_model);
+    }
+
     private void finishModelActivity() {
         finish();
     }
@@ -96,9 +98,15 @@ public class ModelActivity extends AppCompatActivity {
 
     private void showOneMoreTime() {
         if (!isAsked) {
+            removeQuestionUI();
+
             isAsked = true;
             txtOneMoreTime = new TextView(thisContext);
             txtOneMoreTime.setText("要不要再來一次?");
+//            Bundle param = new Bundle();
+//            param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"uid");
+//            textToSpeech.speak("小朋友要不要再來一次?",TextToSpeech.QUEUE_FLUSH,param,"uid");
+
             layoutModel.addView(txtOneMoreTime);
 
             btnYes = new Button(thisContext);
@@ -134,29 +142,73 @@ public class ModelActivity extends AppCompatActivity {
         layoutModel.removeView(txtOneMoreTime);
         layoutModel.removeView(btnYes);
         layoutModel.removeView(btnNo);
-        txtQuery.setText("");
-        txtResult.setText("");
-        editAnswer.setText("");
-        btnVoice.setEnabled(false);
-        btnSubmit.setEnabled(false);
+
+        addQuestionUI();
+        productQuestion();
     }
 
-    private void initUI() {
-        txtIsConnected = (TextView) findViewById(R.id.txt_is_connected);
-        txtQuery = (TextView) findViewById(R.id.txt_question);
-        txtResult = (TextView) findViewById(R.id.txt_result);
-        editAnswer = (EditText) findViewById(R.id.edit_answer);
-        imgPeople = (ImageView) findViewById(R.id.img_model);
-        btnVoice = (Button) findViewById(R.id.btn_voice);
-        btnVoice.setEnabled(false);
+    private void addReadyUI(){
+        txtReadyAsk = new TextView(thisContext);
+        txtReadyAsk.setText("小朋友準備好要問問題了嗎？");
+        layoutModel.addView(txtReadyAsk);
 
-        btnSubmit = (Button) findViewById(R.id.btn_submit_server);
-        btnSubmit.setEnabled(false);
+        Bundle param = new Bundle();
+        param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"uid");
+        textToSpeech.speak("小朋友準備好要問問題了嗎？",TextToSpeech.QUEUE_FLUSH,param,"uid");
 
-        btnProductQuestion = (Button) findViewById(R.id.btn_product_question);
-        btnProductQuestion.setEnabled(false);
+        btnAskY = new Button(thisContext);
+        btnAskY.setText("是,我準備好了");
+        btnAskY.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeAskUI();
+                addQuestionUI();
+                productQuestion();
+            }
+        });
 
-        layoutModel = (LinearLayout) findViewById(R.id.layout_model);
+        btnAskN = new Button(thisContext);
+        btnAskN.setText("還沒準備好");
+        btnAskN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finishModelActivity();
+            }
+        });
+
+        layoutModel.addView(btnAskY);
+        layoutModel.addView(btnAskN);
+    }
+
+    private void removeAskUI(){
+        layoutModel.removeView(txtReadyAsk);
+        layoutModel.removeView(btnAskY);
+        layoutModel.removeView(btnAskN);
+    }
+
+    private void addQuestionUI() {
+        btnVoice = new Button(thisContext);
+        btnVoice.setText("語音");
+        btnVoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startVoiceInput();
+            }
+        });
+
+        txtQuery = new TextView(thisContext);
+
+        layoutModel.addView(txtQuery);
+        layoutModel.addView(btnVoice);
+    }
+
+    private void removeQuestionUI(){
+        layoutModel.removeView(txtQuery);
+        layoutModel.removeView(btnVoice);
+    }
+
+    private void productQuestion(){
+        clientSocket.emit("question", storyName);
     }
 
     /*====================
@@ -241,7 +293,8 @@ public class ModelActivity extends AppCompatActivity {
             case REQ_CODE_SPEECH_INPUT:
                 if (resultCode == RESULT_OK && data != null) {
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    editAnswer.setText(result.get(0));
+                    String userInput = result.get(0);
+                    clientSocket.emit("answer",userInput);
                 }
                 break;
         }
@@ -292,13 +345,7 @@ public class ModelActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     txtIsConnected.setText("連線成功");
-                    btnProductQuestion.setEnabled(true);
-                    btnProductQuestion.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            clientSocket.emit("question", storyName);
-                        }
-                    });
+                    addReadyUI();
                 }
             });
         }
@@ -311,8 +358,6 @@ public class ModelActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     txtIsConnected.setText("連線失敗");
-                    btnSubmit.setEnabled(false);
-                    btnVoice.setEnabled(false);
                 }
             });
         }
@@ -348,25 +393,7 @@ public class ModelActivity extends AppCompatActivity {
                         param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"");
 
                         textToSpeech.speak(question, TextToSpeech.QUEUE_FLUSH, param,"uid");
-
-                        btnSubmit.setEnabled(true);
-                        btnSubmit.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                String answer = editAnswer.getText().toString().trim();
-                                clientSocket.emit("answer", answer);
-                            }
-                        });
-
-                        btnVoice.setEnabled(true);
-                        btnVoice.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                startVoiceInput();
-                            }
-                        });
                     }
-
                 }
             });
         }
@@ -386,18 +413,13 @@ public class ModelActivity extends AppCompatActivity {
                     if (result.equals("yes")) {
                         Bundle param = new Bundle();
                         param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"");
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            textToSpeech.speak("恭喜你答對了", TextToSpeech.QUEUE_FLUSH, param,"uid");
-                        }
-                        txtResult.setText("答對囉");
+                        textToSpeech.speak("恭喜你答對了", TextToSpeech.QUEUE_FLUSH, param,"uid");
                         showOneMoreTime();
                     } else {
                         Bundle param = new Bundle();
                         param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"");
                         textToSpeech.speak("不對喔，再試一次", TextToSpeech.QUEUE_FLUSH, param,"uid");
-                        txtResult.setText("答錯囉");
                     }
-
                 }
             });
         }
