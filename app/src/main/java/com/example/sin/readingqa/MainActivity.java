@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private RequestQueue mQueue;
-    private static final String url = "http://140.123.97.116:8001/storyInfo";
+    private static final String url = "http://123";
     private JSONArray storiesInfoJsonArray;
 
     private String sid;

@@ -37,7 +37,7 @@ public class ModelActivity extends AppCompatActivity {
 
     private String sid;
     private Socket clientSocket;
-    private static final String URL = "http://140.123.97.116:8001";
+    private static final String URL = "http://123";
     private static final int REQ_CODE_SPEECH_INPUT = 100;
 
     private TextView txtIsConnected;
