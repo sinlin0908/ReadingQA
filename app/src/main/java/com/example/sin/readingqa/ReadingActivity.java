@@ -30,11 +30,11 @@ public class ReadingActivity extends YouTubeBaseActivity {
     private YouTubePlayer mYouTubePlayer;
     private Button btn_go_qa_false, btn_go_qa_true;
     private TextView txt_go_to_qa;
-    LinearLayout linearLayout;
+    private LinearLayout linearLayout;
 
-    boolean isAsked = false;
+    private boolean isAsked = false;
 
-    private String storyName;
+    private String sid;
     private String storyURL;
     private String mVideoID;
 
@@ -59,14 +59,15 @@ public class ReadingActivity extends YouTubeBaseActivity {
         Bundle bundle = intent.getExtras();
 
         if (bundle != null) {
-            storyName = bundle.getString("storyName");
+            sid = bundle.getString("sid");
             storyURL = bundle.getString("storyURL");
+            Log.d("YT get info",sid+" "+storyURL);
             if (storyURL != null) {
                 mVideoID = getVideoID(storyURL);
 
                 if (mVideoID == null) {
                     Log.d(TAG, "Not catch video ID");
-                    Toast.makeText(this,"No video id",Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "No video id", Toast.LENGTH_LONG).show();
                     finishReadingActivity();
                 }
             }
@@ -90,16 +91,16 @@ public class ReadingActivity extends YouTubeBaseActivity {
     /*------- 返回鍵 -----*/
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode==KeyEvent.KEYCODE_BACK){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             finishReadingActivity();
         }
         return super.onKeyDown(keyCode, event);
     }
 
     private void initUI() {
-        youTubePlayerView = (YouTubePlayerView) findViewById(R.id.view_youtube);
+        youTubePlayerView = findViewById(R.id.view_youtube);
         youTubePlayerView.initialize(YouTubeConfig.getApiKey(), onInitializedListener);
-        linearLayout = (LinearLayout) findViewById(R.id.layout);
+        linearLayout = findViewById(R.id.layout);
         mAutoRotation = Settings.System.getInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1;
     }
 
@@ -143,7 +144,7 @@ public class ReadingActivity extends YouTubeBaseActivity {
                         | YouTubePlayer.FULLSCREEN_FLAG_CONTROL_SYSTEM_UI
                         | YouTubePlayer.FULLSCREEN_FLAG_ALWAYS_FULLSCREEN_IN_LANDSCAPE
                         | YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT);
-            }else {
+            } else {
                 youTubePlayer.addFullscreenControlFlag(YouTubePlayer.FULLSCREEN_FLAG_CONTROL_ORIENTATION
                         | YouTubePlayer.FULLSCREEN_FLAG_CONTROL_SYSTEM_UI
                         | YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT);
@@ -218,7 +219,7 @@ public class ReadingActivity extends YouTubeBaseActivity {
                     public void onClick(View view) {
                         Intent intent = new Intent(getApplicationContext(), ModelActivity.class);
 
-                        intent.putExtra("storyName", storyName);
+                        intent.putExtra("sid", sid);
 
                         startActivity(intent);
                     }
@@ -266,9 +267,9 @@ public class ReadingActivity extends YouTubeBaseActivity {
     private YouTubePlayer.OnFullscreenListener onFullscreenListener = new YouTubePlayer.OnFullscreenListener() {
         @Override
         public void onFullscreen(boolean b) {
-            if (b){
+            if (b) {
                 setRequestedOrientation(LANDSCAPE_ORIENTATION);
-            }else {
+            } else {
                 setRequestedOrientation(PORTRAIT_ORIENTATION);
             }
         }

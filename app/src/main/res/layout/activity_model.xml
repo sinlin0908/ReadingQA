@@ -14,10 +14,10 @@
         android:text="沒有連線"
         android:id="@+id/txt_is_connected"/>
     <ImageView
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:id="@+id/img_model"
-        android:src="@drawable/people"/>
+        android:src="@drawable/girl"/>
 
 
 
