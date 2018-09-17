@@ -1,3 +1,7 @@
+/*
+ * @ author: Sin Lin
+ * @ From CCU DM+ lab
+ * */
 package com.example.sin.readingqa;
 
 import android.content.pm.ActivityInfo;
@@ -126,6 +130,11 @@ public class ReadingActivity extends YouTubeBaseActivity {
     /*============================
      *          YouTube
      * ===========================*/
+
+    /*
+     * @ author: Sin Lin
+     * @ From CCU DM+ lab
+     * */
 
     /*------------ Youtube Initialize Listener ------*/
     private YouTubePlayer.OnInitializedListener onInitializedListener = new YouTubePlayer.OnInitializedListener() {

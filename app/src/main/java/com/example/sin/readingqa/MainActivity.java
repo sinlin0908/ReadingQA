@@ -1,3 +1,8 @@
+/*
+ * @ author: Sin Lin
+ * @ From CCU DM+ lab
+ * */
+
 package com.example.sin.readingqa;
 
 import android.content.Intent;
@@ -42,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /*
+         * @ author: Sin Lin
+         * @ From CCU DM+ lab
+         * */
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -114,6 +124,10 @@ public class MainActivity extends AppCompatActivity {
     /*========================
      * Spinner Select Listener
      * =======================*/
+    /*
+     * @ author: Sin Lin
+     * @ From CCU DM+ lab
+     * */
     private AdapterView.OnItemSelectedListener spnOnItemSelected = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -127,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                             sid = jsonObject.getString("sid");
                             storyUrl = jsonObject.getString("URL");
 
-                            Log.d("StoryInfo",sid+"   "+storyUrl);
+                            Log.d("StoryInfo", sid + "   " + storyUrl);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -148,11 +162,15 @@ public class MainActivity extends AppCompatActivity {
     /*======================
      * Go to ReadingActivity
      * =====================*/
+    /*
+     * @ author: Sin Lin
+     * @ From CCU DM+ lab
+     * */
     private void startReadingActivity() {
         Intent intent = new Intent(this, ReadingActivity.class);
 
         Bundle bundle = new Bundle();
-        Log.d("put Info",sid+"  "+storyUrl);
+        Log.d("put Info", sid + "  " + storyUrl);
         bundle.putString("sid", sid);
         bundle.putString("storyURL", storyUrl);
 

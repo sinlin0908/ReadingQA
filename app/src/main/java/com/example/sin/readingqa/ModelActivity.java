@@ -1,3 +1,8 @@
+/*
+ * @ author: Sin Lin
+ * @ From CCU DM+ lab
+ * */
+
 package com.example.sin.readingqa;
 
 import android.content.ActivityNotFoundException;
@@ -67,6 +72,10 @@ public class ModelActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /*
+         * @ author: Sin Lin
+         * @ From CCU DM+ lab
+         * */
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_model);
         createTextToSpeech();
@@ -187,28 +196,6 @@ public class ModelActivity extends AppCompatActivity {
 
         layoutModel.addView(btnVoice);
 
-//        btnAskY = new Button(thisContext);
-//        btnAskY.setText("是,我準備好了");
-//        btnAskY.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                removeAskUI();
-//                addQuestionUI();
-//                productQuestion();
-//            }
-//        });
-//
-//        btnAskN = new Button(thisContext);
-//        btnAskN.setText("還沒準備好");
-//        btnAskN.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                finishModelActivity();
-//            }
-//        });
-//
-//        layoutModel.addView(btnAskY);
-//        layoutModel.addView(btnAskN);
     }
 
     private void removeAskUI() {
@@ -217,11 +204,6 @@ public class ModelActivity extends AppCompatActivity {
         txtReadyAsk = null;
 
 
-//        layoutModel.removeView(btnAskY);
-//        btnAskY = null;
-//
-//        layoutModel.removeView(btnAskN);
-//        btnAskN = null;
         layoutModel.removeView(btnVoice);
         btnVoice = null;
 
@@ -260,6 +242,10 @@ public class ModelActivity extends AppCompatActivity {
     /*====================
      *      TextToSpeech
      * ===================*/
+    /*
+     * @ author: Sin Lin
+     * @ From CCU DM+ lab
+     * */
     private void createTextToSpeech() {
         if (textToSpeech == null) {
             textToSpeech = new TextToSpeech(thisContext, new TextToSpeech.OnInitListener() {
@@ -319,6 +305,10 @@ public class ModelActivity extends AppCompatActivity {
     /*====================
      *      SpeechToText
      * ===================*/
+    /*
+     * @ author: Sin Lin
+     * @ From CCU DM+ lab
+     * */
     private void startVoiceInput() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -468,7 +458,7 @@ public class ModelActivity extends AppCompatActivity {
                     if (!question.equals("null") && !question.equals("")) {
                         if (question.contains("什麼什麼")) {
                             txtQuery.setText(updateString(question));
-                        }else {
+                        } else {
                             txtQuery.setText(question);
                         }
 
