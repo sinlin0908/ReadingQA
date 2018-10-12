@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private RequestQueue mQueue;
-    private static final String url = "http://123";
+    private static final String url = "http://140.123.97.121:8001/storyInfo";
     private JSONArray storiesInfoJsonArray;
 
     private String sid;
@@ -107,7 +107,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             for (int i = 0; i < storiesInfoJsonArray.length(); i++) {
                 JSONObject jsonObject = storiesInfoJsonArray.getJSONObject(i);
-                storyNameList.add(jsonObject.getString("name"));
+                Log.d("aaaa",storiesInfoJsonArray.getJSONObject(i).toString());
+                storyNameList.add(jsonObject.getString("Story_name"));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -137,9 +138,9 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < storiesInfoJsonArray.length(); i++) {
                     try {
                         JSONObject jsonObject = storiesInfoJsonArray.getJSONObject(i);
-                        if (jsonObject.get("name").equals(chosenStoryName)) {
-                            sid = jsonObject.getString("sid");
-                            storyUrl = jsonObject.getString("URL");
+                        if (jsonObject.get("Story_name").equals(chosenStoryName)) {
+                            sid = jsonObject.getString("Sid");
+                            storyUrl = jsonObject.getString("url");
 
                             Log.d("StoryInfo", sid + "   " + storyUrl);
                         }

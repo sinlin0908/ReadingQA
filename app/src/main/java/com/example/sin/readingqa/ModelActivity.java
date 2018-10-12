@@ -1,8 +1,3 @@
-/*
- * @ author: Sin Lin
- * @ From CCU DM+ lab
- * */
-
 package com.example.sin.readingqa;
 
 import android.content.ActivityNotFoundException;
@@ -42,7 +37,7 @@ public class ModelActivity extends AppCompatActivity {
 
     private String sid;
     private Socket clientSocket;
-    private static final String URL = "http://123";
+    private static final String URL = "http://140.123.97.121:8001";
     private static final int REQ_CODE_SPEECH_INPUT = 100;
 
     private TextView txtIsConnected;
@@ -63,10 +58,6 @@ public class ModelActivity extends AppCompatActivity {
 
     private boolean isAsked = false;
 
-    private boolean doesAskedReady = false;
-    private boolean doesAskedOneMore = false;
-
-    private Button btnAskY, btnAskN;
 
     private String qid;
 
@@ -132,7 +123,7 @@ public class ModelActivity extends AppCompatActivity {
 
             layoutModel.addView(txtOneMoreTime);
 
-//            btnVoice = new Button(this);
+
 
             btnYes = new Button(thisContext);
             btnYes.setText("要");
@@ -176,7 +167,7 @@ public class ModelActivity extends AppCompatActivity {
     }
 
     private void addReadyUI() {
-        doesAskedReady = true;
+
         txtReadyAsk = new TextView(thisContext);
         txtReadyAsk.setText("小朋友準備好要問問題了嗎？");
         layoutModel.addView(txtReadyAsk);
@@ -457,6 +448,7 @@ public class ModelActivity extends AppCompatActivity {
 
                     if (!question.equals("null") && !question.equals("")) {
                         if (question.contains("什麼什麼")) {
+                            question = question + "\n請問小朋友空格要填入什麼答案呢？";
                             txtQuery.setText(updateString(question));
                         } else {
                             txtQuery.setText(question);
@@ -470,10 +462,10 @@ public class ModelActivity extends AppCompatActivity {
                 }
 
                 @NonNull
-                private String updateString(String question) {
+                private String updateString(String question) {   // split ','
                     int index = question.indexOf("什麼什麼");
 
-                    return question.substring(0, index - 1) + "什麼什麼" + question.substring(index + 5);
+                    return question.substring(0, index - 1) + "__" + question.substring(index + 5);
                 }
             });
         }

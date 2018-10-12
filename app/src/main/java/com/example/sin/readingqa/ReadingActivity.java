@@ -4,14 +4,14 @@
  * */
 package com.example.sin.readingqa;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,8 +32,8 @@ public class ReadingActivity extends YouTubeBaseActivity {
 
     private YouTubePlayerView youTubePlayerView;
     private YouTubePlayer mYouTubePlayer;
-    private Button btn_go_qa_false, btn_go_qa_true;
-    private TextView txt_go_to_qa;
+//    private Button btn_go_qa_false, btn_go_qa_true;
+//    private TextView txt_go_to_qa;
     private LinearLayout linearLayout;
 
     private boolean isAsked = false;
@@ -56,6 +56,18 @@ public class ReadingActivity extends YouTubeBaseActivity {
         getMessage();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isAsked = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mYouTubePlayer.release();
+    }
 
     private void getMessage() {
         Intent intent = getIntent();
@@ -65,7 +77,7 @@ public class ReadingActivity extends YouTubeBaseActivity {
         if (bundle != null) {
             sid = bundle.getString("sid");
             storyURL = bundle.getString("storyURL");
-            Log.d("YT get info",sid+" "+storyURL);
+            Log.d("YT get info", sid + " " + storyURL);
             if (storyURL != null) {
                 mVideoID = getVideoID(storyURL);
 
@@ -79,9 +91,10 @@ public class ReadingActivity extends YouTubeBaseActivity {
     }
 
     private String getVideoID(String URL) {
-        int pos = URL.indexOf("?v=");
+        String pattern = "youtu.be/";
+        int pos = URL.indexOf(pattern);
         if (pos != -1) {
-            String videoID = URL.substring(pos + "?v=".length());
+            String videoID = URL.substring(pos + pattern.length());
             Log.d(TAG, "getVideoId: " + videoID);
             return videoID;
         }
@@ -205,36 +218,48 @@ public class ReadingActivity extends YouTubeBaseActivity {
             if (!isAsked) {
                 isAsked = true;
 
-                mYouTubePlayer.setFullscreen(false);
-                txt_go_to_qa = new TextView(getApplicationContext());
-                txt_go_to_qa.setText("要不要做閱讀測驗?");
-                txt_go_to_qa.setTextColor(Color.WHITE);
-                linearLayout.addView(txt_go_to_qa);
+                askGoToQA();
 
-                btn_go_qa_false = new Button(getApplicationContext());
-                btn_go_qa_false.setText("不要");
-                btn_go_qa_false.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        finishReadingActivity();
-                    }
-                });
-                linearLayout.addView(btn_go_qa_false);
+                mYouTubePlayer.seekToMillis(0);
+                mYouTubePlayer.pause();
 
-                btn_go_qa_true = new Button(getApplicationContext());
-                btn_go_qa_true.setText("要");
-                btn_go_qa_true.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(getApplicationContext(), ModelActivity.class);
 
-                        intent.putExtra("sid", sid);
 
-                        startActivity(intent);
-                    }
-                });
-                linearLayout.addView(btn_go_qa_true);
             }
+        }
+
+        private void askGoToQA() {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(ReadingActivity.this);
+            dialog.setTitle("訊息");
+            dialog.setMessage("要做閱讀測驗嗎?");
+
+            dialog.setPositiveButton("要", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    Intent intent = new Intent(getApplicationContext(), ModelActivity.class);
+
+                    intent.putExtra("sid", sid);
+
+                    startActivity(intent);
+                }
+            });
+
+            dialog.setNegativeButton("不要", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finishReadingActivity();
+                }
+            });
+
+            dialog.setNeutralButton("再看一次故事", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    isAsked = false;
+                }
+            });
+
+            dialog.show();
         }
 
         @Override
