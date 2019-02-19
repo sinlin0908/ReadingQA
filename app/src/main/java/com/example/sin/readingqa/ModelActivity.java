@@ -1,7 +1,9 @@
 package com.example.sin.readingqa;
 
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.speech.RecognizerIntent;
@@ -11,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -60,6 +63,8 @@ public class ModelActivity extends AppCompatActivity {
 
 
     private String qid;
+
+    private boolean isAskQuestion = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,12 +125,16 @@ public class ModelActivity extends AppCompatActivity {
             isAsked = true;
             txtOneMoreTime = new TextView(thisContext);
             txtOneMoreTime.setText("要不要再來一次?");
+            txtOneMoreTime.setTextSize(20);
+            txtOneMoreTime.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
 
             layoutModel.addView(txtOneMoreTime);
 
-
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
 
             btnYes = new Button(thisContext);
+
+            btnYes.setLayoutParams(params);
             btnYes.setText("要");
             btnYes.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,6 +146,8 @@ public class ModelActivity extends AppCompatActivity {
             layoutModel.addView(btnYes);
 
             btnNo = new Button(thisContext);
+
+            btnNo.setLayoutParams(params);
             btnNo.setText("不要");
             btnNo.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -169,6 +180,8 @@ public class ModelActivity extends AppCompatActivity {
     private void addReadyUI() {
 
         txtReadyAsk = new TextView(thisContext);
+        txtReadyAsk.setTextSize(20);
+        txtReadyAsk.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         txtReadyAsk.setText("小朋友準備好要問問題了嗎？");
         layoutModel.addView(txtReadyAsk);
 
@@ -177,7 +190,10 @@ public class ModelActivity extends AppCompatActivity {
         textToSpeech.speak("小朋友準備好要問問題了嗎？", TextToSpeech.QUEUE_FLUSH, param, "uid");
 
         btnVoice = new Button(thisContext);
-        btnVoice.setText("語言");
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+        btnVoice.setLayoutParams(params);
+        btnVoice.setText("語音");
+
         btnVoice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -204,6 +220,8 @@ public class ModelActivity extends AppCompatActivity {
     private void addQuestionUI() {
         btnVoice = new Button(thisContext);
         btnVoice.setText("語音");
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+        btnVoice.setLayoutParams(params);
         btnVoice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -324,7 +342,7 @@ public class ModelActivity extends AppCompatActivity {
                     String userInput = result.get(0);
 
                     switch (userInput) {
-                        case "我準備好了":
+                        case "我準備好了": case "準備好了":
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -334,24 +352,49 @@ public class ModelActivity extends AppCompatActivity {
                                 }
                             });
                             break;
-                        case "我還沒準備好":
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    finishModelActivity();
-                                }
-                            });
-                            break;
-                        default:
-                            JSONObject jsonObject = new JSONObject();
-                            try {
-                                jsonObject.put("qid", qid);
-                                jsonObject.put("userInput", userInput);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            clientSocket.emit("answer", jsonObject);
 
+                        default:
+
+                            if (isAskQuestion){
+                                JSONObject jsonObject = new JSONObject();
+                                try {
+                                    jsonObject.put("qid", qid);
+                                    jsonObject.put("userInput", userInput);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                clientSocket.emit("answer", jsonObject);
+                            }
+                            else {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        askFinishModelActivity();
+                                    }
+
+                                    private void askFinishModelActivity() {
+                                        AlertDialog.Builder dialog = new AlertDialog.Builder(ModelActivity.this);
+                                        dialog.setTitle("訊息");
+                                        dialog.setMessage("確定要離開問答嗎？");
+
+                                        dialog.setPositiveButton("要", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                goToMainActivity();
+                                            }
+                                        });
+
+                                        dialog.setNegativeButton("不要", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                isAskQuestion = false;
+                                            }
+                                        });
+
+                                        dialog.show();
+                                    }
+                                });
+                            }
                             break;
                     }
                 }
@@ -415,6 +458,8 @@ public class ModelActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     txtIsConnected.setText("連線失敗");
+                    removeAskUI();
+                    removeQuestionUI();
                 }
             });
         }
@@ -438,6 +483,7 @@ public class ModelActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    isAskQuestion = true;
 
                     String data = (String) args[0];
 
@@ -446,10 +492,13 @@ public class ModelActivity extends AppCompatActivity {
                     String question = temp[0];
                     qid = temp[1];
 
+                    txtQuery.setTextSize(20);
+                    txtQuery.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
                     if (!question.equals("null") && !question.equals("")) {
                         if (question.contains("什麼什麼")) {
                             question = question + "\n請問小朋友空格要填入什麼答案呢？";
                             txtQuery.setText(updateString(question));
+
                         } else {
                             txtQuery.setText(question);
                         }
@@ -457,15 +506,19 @@ public class ModelActivity extends AppCompatActivity {
                         Bundle param = new Bundle();
                         param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "");
 
-                        textToSpeech.speak(question, TextToSpeech.QUEUE_FLUSH, param, "uid");
+                        textToSpeech.speak("叮叮！ 題目來囉！\n"+question, TextToSpeech.QUEUE_FLUSH, param, "uid");
                     }
                 }
 
                 @NonNull
                 private String updateString(String question) {   // split ','
-                    int index = question.indexOf("什麼什麼");
+                    String pattern = "什麼什麼";
 
-                    return question.substring(0, index - 1) + "__" + question.substring(index + 5);
+                    for(int index = question.indexOf(pattern);index!=-1;index = question.indexOf(pattern))
+                    {
+                        question = question.substring(0, index - 1) + "___ ___" + question.substring(index + 5);
+                    }
+                    return question;
                 }
             });
         }

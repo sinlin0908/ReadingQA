@@ -12,9 +12,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
@@ -32,9 +30,7 @@ public class ReadingActivity extends YouTubeBaseActivity {
 
     private YouTubePlayerView youTubePlayerView;
     private YouTubePlayer mYouTubePlayer;
-//    private Button btn_go_qa_false, btn_go_qa_true;
-//    private TextView txt_go_to_qa;
-    private LinearLayout linearLayout;
+
 
     private boolean isAsked = false;
 
@@ -117,7 +113,7 @@ public class ReadingActivity extends YouTubeBaseActivity {
     private void initUI() {
         youTubePlayerView = findViewById(R.id.view_youtube);
         youTubePlayerView.initialize(YouTubeConfig.getApiKey(), onInitializedListener);
-        linearLayout = findViewById(R.id.layout);
+
         mAutoRotation = Settings.System.getInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1;
     }
 
