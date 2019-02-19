@@ -6,6 +6,14 @@
 
 ![架構圖](img/img.png)
 
+## Requirement
+
+- Youtube API
+- Socket io
+- Volley
+- Glide
+
+
 ## Select Story Name
 
 - We use spinner th choose story name children want to watch in YouTube.
